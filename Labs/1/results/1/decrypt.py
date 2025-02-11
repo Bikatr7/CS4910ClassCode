@@ -1,6 +1,9 @@
 from collections import Counter
 import re
 
+## found plaintxt:
+## https://pastebin.com/raw/GcgLPYjz
+
 SUBSTITUTIONS = {
     'y': 't',
     't': 'h',
