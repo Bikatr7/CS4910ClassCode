@@ -1,0 +1,56 @@
+Approach:
+I created a Python script (encrypt.py) to automate testing multiple cipher types with OpenSSL. The script:
+1. Takes a plaintext file as input (I used the plaintext.txt file from Task 1, which was the encrypted text from the substitution cipher)
+2. Attempts encryption/decryption with 5 different cipher types
+3. Verifies the decrypted output matches the original input
+
+Cipher Types Tested:
+1. AES-128-CBC: Advanced Encryption Standard (128-bit key) in CBC mode
+2. AES-256-CBC: AES with 256-bit key in CBC mode
+3. Blowfish-CBC: Blowfish cipher in CBC mode
+4. AES-128-CFB: AES (128-bit key) in CFB mode
+5. Triple DES-CBC: Triple DES in CBC mode
+
+Configuration Used:
+- Key: 00112233445566778889aabbccddeeff
+- IV: 0102030405060708
+- Input: plaintext.txt
+
+Results and Observations:
+1. Successful Ciphers:
+   - AES-128-CBC: Successfully encrypted and decrypted
+   - AES-256-CBC: Successfully encrypted and decrypted
+   - AES-128-CFB: Successfully encrypted and decrypted
+   - Triple DES-CBC: Successfully encrypted and decrypted
+
+2. Failed Cipher:
+   - Blowfish-CBC: Failed with error "Error setting cipher BF-CBC"
+   This failure was interesting as it revealed that my version of OpenSSL (3.0+) has changed the way certain ciphers are 
+   loaded. I could change it to make it work, but I felt that having a failed cipher was more informative. (https://stackoverflow.com/questions/72446627/openssl-3-0-command-fail-to-setting-cipher)
+
+Implementation Details:
+I implemented the OpenSSL commands through Python's subprocess module, which allowed for:
+- Proper error handling
+- Automated testing of multiple ciphers
+- Verification of encryption/decryption success
+- Clean output formatting
+
+The script generates two files for each successful cipher:
+1. cipher_*.bin: The encrypted binary file
+2. decrypted_*.txt: The decrypted text file
+
+Verification:
+For each successful cipher, I verified that:
+1. The encryption process completed without errors
+2. The decryption process completed without errors
+3. The decrypted output exactly matched the original input
+
+Interesting Observations:
+1. Modern OpenSSL versions have changed the way certain ciphers are loaded, which is why the Blowfish cipher failed.
+2. All successful ciphers produced different binary outputs but decrypted to the same plaintext
+3. The script's error handling caught and reported the Blowfish failure while continuing with other tests
+4. CBC mode was successfully tested with different key sizes (128-bit vs 256-bit AES)
+5. Both CBC and CFB modes worked successfully with AES
+
+The automation approach allowed for consistent testing across different cipher types and modes, 
+making it easy to verify the encryption/decryption process and identify any issues.
