@@ -1,0 +1,53 @@
+Approach:
+I created a Python script to automate the encryption of BMP images using both ECB and CBC modes. The script:
+1. Reads the actual BMP header size from the file (varies by BMP format)
+2. Encrypts the image data using AES-128 in both modes
+3. Reattaches the original header to maintain BMP format
+
+Implementation Details:
+- Used OpenSSL for encryption
+- Key: 00112233445566778889aabbccddeeff
+- IV (for CBC): 0102030405060708
+- Dynamic BMP header preservation
+
+Results for pic_original.bmp (red circle and green square):
+1. ECB Mode:
+   - Pattern of the original shapes are visible, as well as their colors
+   - Black and white areas create distinct patterns
+   - Shape and basic features easily recognizable
+   - Classic demonstration of ECB mode's weakness
+
+2. CBC Mode:
+   - Produces completely random-looking output
+   - No feature of the original image is visible
+   - Perfect obscuring of the original image
+
+Results for custom_photo.bmp (more complex image, screen shot of the lab report template):
+1. ECB Mode:
+   - Despite being a more complex image, patterns still visible, I can even read the text in the image with some effort
+   - Areas of similar colors show repeating patterns
+   - General structure of the image remains discernible
+   - Demonstrates ECB weakness persists even with complex images
+
+2. CBC Mode:
+   - Complete randomization achieved
+   - No recognizable patterns or structures
+   - Proper security maintained
+
+Key Observations:
+1. ECB Mode Weaknesses:
+   - Identical input blocks produce identical output blocks
+   - Makes patterns visible in both simple and complex images
+   - Particularly obvious with the first image due to large areas of same color
+   - Even complex images reveal structural information
+
+2. CBC Mode Advantages:
+   - Each block depends on previous blocks
+   - Produces random-looking output regardless of input image complexity
+   - No visual patterns preserved in either image
+   - Consistently secure across different image types
+
+3. Header Handling:
+   - BMP headers vary in size between different formats
+   - Proper header preservation is crucial for viewability
+   - Required dynamic header size detection
