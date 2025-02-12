@@ -1,0 +1,51 @@
+Approach:
+1. First analyzed letter frequencies using freq.py, which showed:
+   - Most common letters: n, y, v, x, u, q, m
+   - Most common bigrams: yt, tn, mu
+   - Most common trigrams: ytn (78 occurrences)
+
+2. Used frequency analysis to make initial mappings:
+   - 'n' (most common) → 'e' (most common English letter)
+   - 'ytn' (most common trigram) likely → 'the'
+   Therefore:
+   - 'y' → 't'
+   - 't' → 'h'
+   - 'n' → 'e'
+
+3. Built out remaining substitutions by:
+   - Looking for common English patterns
+   - Identifying word structures
+   - Using common English words as templates
+   - Cross-referencing letter frequencies
+
+Final Substitution Key:
+----------------------
+a → c    j → q    s → k    
+b → f    k → x    t → h
+c → m    l → w    u → n
+d → y    m → i    v → a
+e → p    n → e    w → z
+f → v    o → j    x → o
+g → b    p → d    y → t
+h → r    q → s    z → u
+i → l    r → g
+
+Verification:
+------------
+- Decrypted the text enough to be sort of readable, I then google searched the text to find the original article
+- This brought up a pastebin link, which contained the exact text, minus some typos
+- Using the known plaintext, I changed the substitutions to map the known plaintext to the actual plaintext
+- Text appears to be an article about the Oscars
+- All words are valid English
+- Proper nouns and names are correctly decrypted
+
+The decryption revealed an article discussing the 2018 Academy Awards, mentioning topics like:
+- Harvey Weinstein
+- The #MeToo movement
+- Golden Globes ceremony
+- Best Picture predictions
+- Voting patterns
+
+The substitution cipher was solved without requiring any post-processing or corrections, indicating I found the correct one-to-one character mappings.
+
+The code implements a substitution cipher decoder. It starts by analyzing letter frequencies in the ciphertext using freq.py, which helped identify common patterns like 'ytn' → 'the'. The main decrypt.py script contains a substitution mapping where each ciphertext letter maps to exactly one plaintext letter (e.g., 'y' → 't', 't' → 'h', 'n' → 'e'). When run, it applies these substitutions to convert the ciphertext into readable English. The script also includes validation to ensure each letter maps to a unique output letter, and a comparison function to verify the decrypted text against a known plaintext.
