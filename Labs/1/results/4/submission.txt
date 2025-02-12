@@ -1,0 +1,56 @@
+
+I tested four encryption modes with AES-128 on a test file:
+
+1. ECB (Electronic Code Book):
+   - Requires padding
+   - Block-based encryption where each block is encrypted independently
+   - Must pad to block size (16 bytes for AES)
+
+2. CBC (Cipher Block Chaining):
+   - Requires padding
+   - Each block depends on previous block
+   - Must pad to block size (16 bytes for AES)
+
+3. CFB (Cipher Feedback):
+   - No padding required
+   - Stream cipher mode that turns block cipher into stream cipher
+   - Can encrypt data of any length
+
+4. OFB (Output Feedback):
+   - No padding required
+   - Stream cipher mode that generates keystream independently of plaintext
+   - Can encrypt data of any length
+
+CFB and OFB don't need padding because they operate as stream ciphers, encrypting data bit by bit 
+rather than in fixed-size blocks.
+
+I created three files of different sizes:
+1. f1.txt: 5 bytes  ("12345")
+2. f2.txt: 10 bytes ("1234567890")
+3. f3.txt: 16 bytes ("1234567890123456")
+
+Results using AES-128-CBC:
+
+1. 5-byte file (f1.txt):
+   - Original size: 5 bytes
+   - Encrypted size: 16 bytes
+   - Padding added: 11 bytes, each with value 0x0B
+   - Explanation: Needed 11 bytes to reach 16 (block size)
+
+2. 10-byte file (f2.txt):
+   - Original size: 10 bytes
+   - Encrypted size: 16 bytes
+   - Padding added: 6 bytes, each with value 0x06
+   - Explanation: Needed 6 bytes to reach 16
+
+3. 16-byte file (f3.txt):
+   - Original size: 16 bytes
+   - Encrypted size: 32 bytes
+   - Padding added: Full block (16 bytes) of 0x10
+   - Explanation: When size is multiple of block size, add full padding block
+
+Key Observations:
+1. PKCS#5 padding adds bytes with value equal to the number of padding bytes needed
+2. Even if file size is a multiple of block size, a full block of padding is added
+3. Encrypted file size is always a multiple of the block size (16 bytes for AES)
+4. Using -nopad during decryption allowed observation of the padding bytes 
