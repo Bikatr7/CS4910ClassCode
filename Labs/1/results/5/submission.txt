@@ -1,0 +1,49 @@
+Approach:
+I created a script to test error propagation across different encryption modes by:
+1. Creating a 1000-byte test file with repeating alphabet pattern
+2. Encrypting it using different modes
+3. Corrupting a single bit in byte 54 of the encrypted file
+4. Decrypting and analyzing the damage
+
+Initial Predictions vs Actual Results:
+
+1. ECB (Electronic Code Book):
+   - Prediction: Only the corrupted block (bytes 48-63) affected
+   - Actual: Exactly 16 bytes affected (bytes 48-63)
+   - Perfect match with prediction
+   - Block independence proven by contained damage
+
+2. CBC (Cipher Block Chaining):
+   - Prediction: All blocks from corruption point to end affected (initially incorrect)
+   - Actual: 17 bytes affected (bytes 48-70)
+   - The corruption affects:
+     * The block containing the corrupted bit (48-63)
+     * A few bytes of the next block due to CBC's chaining
+   - Limited propagation due to CBC's decryption properties
+
+3. CFB (Cipher Feedback):
+   - Prediction: Limited propagation from byte 54
+   - Actual: 17 bytes affected (bytes 54-79)
+   - Corruption starts exactly at corrupted bit
+   - Resyncs after feedback shift clears corrupted bit
+
+4. OFB (Output Feedback):
+   - Prediction: Single byte affected
+   - Actual: Exactly 1 byte affected (byte 54)
+   - Perfect match with prediction
+   - Proves keystream independence
+
+Key Observations:
+1. Block modes showed different behaviors:
+   - ECB: Exactly one block (16 bytes) affected
+   - CBC: Initial block plus partial next block (17 bytes) affected
+   - My initial CBC prediction was incorrect; corruption doesn't propagate indefinitely
+
+2. Stream modes showed expected behavior:
+   - CFB: Limited propagation (17 bytes)
+   - OFB: Single-byte impact
+
+3. Error propagation was more contained than initially predicted:
+   - CBC doesn't corrupt all subsequent blocks
+   - CFB resyncs relatively quickly
+   - OFB provides best error containment
