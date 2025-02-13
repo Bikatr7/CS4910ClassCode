@@ -29,6 +29,3 @@ Why IV Must Be Unique:
    - IV provides randomization for the first block
    - Ensures identical plaintexts encrypt differently
    - Acts as a "starting point" for the encryption process
-
-The experiment clearly demonstrates why IV reuse is dangerous - it allows patterns from the plaintext 
-to leak through to the ciphertext, potentially compromising the security of the entire system.

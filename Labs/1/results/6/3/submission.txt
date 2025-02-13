@@ -1,0 +1,30 @@
+Chosen-Plaintext Attack Against Predictable IVs
+
+The vulnerability in this system stems from using predictable IVs in CBC mode encryption. Even though AES-CBC is a secure encryption scheme when used properly, predictable IVs allow an attacker to determine the plaintext through a chosen-plaintext attack.
+
+How the Attack Works:
+
+1. We observe Bob's encrypted message:
+   - We know the ciphertext C₁ = E(M ⊕ IV₁)
+   - We know IV₁ (the original IV)
+   - We know IV₂ (the next IV that will be used)
+   - We know M is either "Yes" or "No"
+
+2. For each candidate message M, we craft a plaintext P such that:
+   E(P ⊕ IV₂) = E(M ⊕ IV₁)
+
+   To achieve this, we set:
+   P = M ⊕ IV₁ ⊕ IV₂
+
+3. When we submit P to the oracle:
+   - If M was our correct guess, the oracle's encryption will match Bob's ciphertext
+   - If M was wrong, the ciphertexts won't match
+
+4. The attack succeeds because:
+   - When we XOR our crafted P with IV₂, we get: P ⊕ IV₂ = (M ⊕ IV₁ ⊕ IV₂) ⊕ IV₂ = M ⊕ IV₁
+   - This means the oracle encrypts the same block as Bob's original message
+   - Therefore, if our guess M is correct, we get the same ciphertext
+
+This demonstrates why IVs must be both unique AND unpredictable in CBC mode. If an attacker can predict the next IV, they can craft plaintexts that reveal information about previous messages, even if those messages were encrypted with different IVs.
+
+The fix would be to use a cryptographically secure random number generator to create IVs for each encryption, rather than using a predictable sequence.
