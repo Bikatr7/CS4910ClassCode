@@ -1,0 +1,34 @@
+Approach:
+I created a script to test encryption of the same plaintext with:
+1. Two different IVs (changing just the last byte)
+2. The same IV reused
+
+Results:
+1. Different IVs:
+   - Same plaintext encrypted with different IVs produced different ciphertexts
+   - Even changing just the last byte of the IV resulted in completely different output
+   - Test confirmed: ciphertexts did not match (False)
+
+2. Same IV:
+   - Same plaintext encrypted with same IV produced identical ciphertexts
+   - Test confirmed: ciphertexts matched exactly (True)
+   - This reveals when the same message is sent multiple times
+
+Why IV Must Be Unique:
+1. Pattern Hiding:
+   - Different IVs ensure same plaintext produces different ciphertexts
+   - Prevents attackers from identifying repeated messages
+   - Hides patterns in the original data
+
+2. Security Implications:
+   - Reusing IVs allows attackers to detect identical plaintexts
+   - In some modes (like OFB), IV reuse can lead to complete message recovery
+   - Compromises the security of even strong encryption algorithms
+
+3. Initialization Vector Role:
+   - IV provides randomization for the first block
+   - Ensures identical plaintexts encrypt differently
+   - Acts as a "starting point" for the encryption process
+
+The experiment clearly demonstrates why IV reuse is dangerous - it allows patterns from the plaintext 
+to leak through to the ciphertext, potentially compromising the security of the entire system.

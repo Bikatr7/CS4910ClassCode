@@ -1,0 +1,31 @@
+Part 1: OFB Mode Analysis
+------------------------
+Given:
+- P1: "This is a known message!"
+- C1: a469b1c502c1cab966965e50425438e1bb1b5f9037a4c159
+- C2: bf73bcd3509299d566c35b5d450337e1bb175f903fafc159
+
+Attack Process:
+1. In OFB mode, ciphertext is produced by XORing plaintext with keystream
+2. Keystream is determined by IV and key, independent of plaintext
+3. When IV is reused, the same keystream is produced
+4. Therefore: P1 ⊕ C1 = P2 ⊕ C2 (same keystream)
+5. We can recover P2 by: P2 = C2 ⊕ (P1 ⊕ C1)
+
+Results:
+- Successfully decrypted P2: "Order: Launch a missile!"
+- Complete message recovery was possible
+- Demonstrates complete failure of security with IV reuse in OFB mode
+
+Part 2: CFB Mode Theoretical Analysis
+-----------------------------------
+In CFB mode:
+- Initial block would be similarly vulnerable (same IV)
+- However, subsequent blocks use previous ciphertext as feedback
+- Therefore:
+  * First block could be fully recovered (like OFB)
+  * Subsequent blocks would be protected by the feedback mechanism
+  * Only the portion of P2 in the first block would be revealed
+
+This demonstrates why IV reuse is particularly dangerous in OFB mode (full message exposure) but 
+still problematic in CFB mode (partial message exposure).
