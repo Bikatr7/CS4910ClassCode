@@ -1,0 +1,35 @@
+In this task, we successfully performed a dictionary attack to find the encryption key used to encrypt the message "This is a top secret." We found that the key was "Syracuse" (padded with '#' characters).
+
+Implementation Details:
+
+1. Known Values:
+   - Plaintext: "This is a top secret."
+   - Ciphertext: 764aa26b55a4da654df6b19e4bce00f4ed05e09346fb0e762583cb7da2ac93a2
+   - IV: aabbccddeeff00998877665544332211
+   - Found Key: "Syracuse" (padded as "Syracuse########")
+   - Key in hex: 53797261637573652323232323232323
+
+2. Attack Strategy:
+   Instead of trying to decrypt the ciphertext, we:
+   - Read words from a dictionary file that was provided
+   - Padded each word with '#' to 16 bytes
+   - Used the padded word as a key to encrypt the known plaintext
+   - Compared the resulting ciphertext with the target ciphertext
+   - When they matched, we found the key
+
+3. Technical Implementation:
+   - Used Python with the cryptography library
+   - Implemented PKCS#7 padding for the plaintext
+   - Used AES-128-CBC mode for encryption
+   - Processed dictionary words efficiently
+
+4. Security Analysis:
+   This attack succeeded because:
+   - The key was a simple English word (Syracuse)
+   - The padding scheme was known (# characters)
+   - We had both plaintext and ciphertext to verify our attempts
+
+The success of this attack demonstrates why using simple words as encryption keys is dangerous, even with a strong algorithm like AES. A secure implementation should:
+   - Use randomly generated keys
+   - Implement proper key derivation functions if deriving keys from passwords
+   - Use sufficient key length and entropy

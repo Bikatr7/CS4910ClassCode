@@ -51,7 +51,7 @@ def validate_substitutions(subs):
 
 def load_words():
     """Load the English word list"""
-    with open('./Labs/1/Files/words.txt', 'r') as f:
+    with open('words.txt', 'r') as f:
         return set(word.strip().lower() for word in f)
 
 def apply_substitutions(text, subs):
@@ -107,7 +107,7 @@ def find_possible_words(text, english_words):
 
 def compare_with_known_plaintext(decrypted_text):
     """Compare decrypted text with known plaintext, ignoring case and non-alphanumeric chars"""
-    with open('./Labs/1/results/1/discovered_plaintext.txt', 'r') as f:
+    with open('discovered_plaintext.txt', 'r') as f:
         known_plaintext = f.read()
     
     def clean_text(text):
@@ -137,7 +137,7 @@ def compare_with_known_plaintext(decrypted_text):
 def main():
     validate_substitutions(SUBSTITUTIONS)
 
-    with open('./Labs/1/Files/ciphertext.txt', 'r') as f:
+    with open('ciphertext.txt', 'r') as f:
         ciphertext = f.read()
 
     english_words = load_words()
