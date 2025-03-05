@@ -1,0 +1,77 @@
+I implemented three different packet filters using Berkeley Packet Filter (BPF) syntax in Scapy to selectively capture network traffic.
+
+1. Capturing only ICMP packets:
+
+Filter used: 'icmp'
+Script:
+#!/usr/bin/env python3
+from scapy.all import *
+
+def print_pkt(pkt):
+    print(f"[*] ICMP Packet captured:")
+    pkt.show()
+
+print("[*] Starting ICMP packet capture...")
+pkt = sniff(iface='br-135b65d693d3', filter='icmp', prn=print_pkt, count=10)
+print("[*] Capture complete")
+
+Results:
+Successfully captured ICMP echo requests and replies between hosts. The output showed:
+- ICMP packets from 10.9.0.5 to 10.9.0.6 (echo-request)
+- ICMP packets from 10.9.0.6 to 10.9.0.5 (echo-reply)
+Each packet showed complete information including IP headers, ICMP type/code, and packet payload.
+
+2. Capturing TCP packets from a specific IP to port 23:
+
+Filter used: 'tcp and src host 10.9.0.5 and dst port 23'
+Script:
+#!/usr/bin/env python3
+from scapy.all import *
+
+def print_pkt(pkt):
+    print(f"[*] TCP Packet captured:")
+    pkt.show()
+
+print("[*] Starting TCP packet capture for specific source and port 23...")
+pkt = sniff(iface='br-135b65d693d3', filter='tcp and src host 10.9.0.5 and dst port 23', 
+           prn=print_pkt, count=5)
+print("[*] Capture complete")
+
+Results:
+Successfully captured TCP packets from host 10.9.0.5 to 10.9.0.6 port 23 (telnet):
+- TCP handshake packets
+- Telnet negotiation packets with flags (PA - PUSH+ACK)
+- Various TCP control packets with different flag combinations
+The capture showed telnet connection establishment and initial protocol negotiation.
+
+3. Capturing packets from/to a particular subnet:
+
+Filter used: 'net 128.230.0.0/16'
+Script:
+#!/usr/bin/env python3
+from scapy.all import *
+
+def print_pkt(pkt):
+    print(f"[*] Subnet Packet captured:")
+    pkt.show()
+
+print("[*] Starting packet capture for subnet 128.230.0.0/16...")
+pkt = sniff(iface='br-135b65d693d3', filter='net 128.230.0.0/16', prn=print_pkt, count=5)
+print("[*] Capture complete")
+
+Results:
+Successfully captured packets directed to the 128.230.0.0/16 subnet:
+- ICMP echo request packets from 10.9.0.5 to 128.230.1.1
+- Multiple ping attempts were captured
+- The packets were being forwarded to the bridge interface gateway (MAC: 02:42:e1:98:74:0f)
+
+Analysis:
+The Berkeley Packet Filter (BPF) syntax provides filtering capabilities that allow precise control over which packets to capture. 
+This selective capturing is essential for:
+
+1. Network troubleshooting - targeting specific protocols or connections
+2. Security monitoring - focusing on suspicious traffic patterns
+3. Performance optimization - reducing processing overhead by filtering irrelevant packets
+4. Protocol analysis - examining specific communication patterns
+
+BPF filters can be combined using logical operators (and, or, not) to create complex filtering rules, making packet sniffing efficient and focused on relevant traffic.
