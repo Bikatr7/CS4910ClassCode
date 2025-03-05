@@ -1,0 +1,38 @@
+Setup:
+I created a simple packet sniffer using Scapy that captures ICMP packets on the bridge interface. The script looks like this:
+
+#!/usr/bin/env python3
+from scapy.all import *
+
+def print_pkt(pkt):
+    pkt.show()
+
+pkt = sniff(iface='br-135b65d693d3', filter='icmp', prn=print_pkt)
+
+Observations:
+
+1. Running as root:
+   When executed with root privileges, the script successfully captured ICMP packets between the containers.
+   The sniffer displayed detailed packet information including:
+   - Ethernet frame details (source and destination MAC addresses)
+   - IP header information (source/destination IP addresses, TTL, protocol)
+   - ICMP message details (type, code, checksum)
+   - Raw packet payload
+
+2. Running as non-root user (seed):
+   When run as a regular user without root privileges, the script failed with the following error:
+   "PermissionError: [Errno 1] Operation not permitted"
+
+Explanation:
+This demonstrates an important security principle in network operations. Packet sniffing requires 
+placing a network interface in "promiscuous mode," which allows it to capture all packets on the network 
+segment, not just those addressed to the host. This is a privileged operation that requires root access 
+in Linux systems.
+
+The permission error occurs because non-privileged users are intentionally restricted from monitoring network 
+traffic as a security measure. If any user could sniff network packets, this would create serious security 
+and privacy vulnerabilities. Sensitive information such as passwords, authentication tokens, and private 
+communications could be intercepted.
+
+This restriction is implemented at the kernel level through the socket API, where certain socket operations 
+(like creating a raw socket for packet capture) require elevated privileges if I am not mistaken.
