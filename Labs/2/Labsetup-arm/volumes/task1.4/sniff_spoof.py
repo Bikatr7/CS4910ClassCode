@@ -19,4 +19,4 @@ def spoof_icmp_reply(pkt):
 
 print("[*] Starting ICMP Sniff and Spoof program...")
 print("[*] Monitoring for ICMP Echo Requests...")
-sniff(filter="icmp", prn=spoof_icmp_reply, iface="eth0") 
+sniff(filter="icmp", prn=spoof_icmp_reply, iface="br-135b65d693d3")

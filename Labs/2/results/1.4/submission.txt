@@ -1,0 +1,53 @@
+Implementation:
+I implemented a program that monitors for ICMP echo requests and automatically responds with spoofed ICMP echo replies, regardless of the destination's existence. The script uses Scapy to sniff packets and generate spoofed responses:
+
+#!/usr/bin/env python3
+from scapy.all import *
+
+def spoof_icmp_reply(pkt):
+    if(pkt.haslayer(ICMP) and pkt[ICMP].type == 8):
+        print(f"[*] Detected ICMP Echo Request: {pkt[IP].src} -> {pkt[IP].dst}")
+        
+
+        ip = IP(src=pkt[IP].dst, dst=pkt[IP].src)
+        icmp = ICMP(type=0, code=0, id=pkt[ICMP].id, seq=pkt[ICMP].seq)
+
+        if(pkt.haslayer(Raw)):
+            data = pkt[Raw].load
+            reply = ip / icmp / data
+        else:
+            reply = ip / icmp
+        
+        print(f"[*] Spoofing ICMP Echo Reply: {pkt[IP].dst} -> {pkt[IP].src}")
+        send(reply, verbose=0)
+
+print("[*] Starting ICMP Sniff and Spoof program...")
+print("[*] Monitoring for ICMP Echo Requests...")
+sniff(filter="icmp", prn=spoof_icmp_reply, iface="br-135b65d693d3")
+
+Experiment Results:
+I tested pinging three IP addresses from hostA with and without my spoofing script running:
+
+1. Non-existing host on the Internet (1.2.3.4):
+   - Without script: Surprisingly received replies (3 packets sent, 3 received)
+   - With script: Successfully intercepted requests and spoofed replies
+
+2. Non-existing host on the LAN (10.9.0.99):
+   - Without script: Failed with "Destination Host Unreachable" (100% packet loss)
+   - With script: Script detected requests but didn't affect host-level ARP failure
+
+3. Existing host on the Internet (8.8.8.8):
+   - Without script: Received replies (3 packets, 3 received plus 2 duplicates)
+   - With script: Successfully intercepted and spoofed additional replies
+
+Analysis:
+1. For the non-existent LAN host (10.9.0.99):
+   The ping fails without my script because ARP resolution fails. My machine sends an ARP request asking "Who has 10.9.0.99?" and gets no response, resulting in "Destination Host Unreachable." My script detects these ICMP requests but can't overcome the ARP-level failure.
+
+2. For external hosts (1.2.3.4 and 8.8.8.8):
+   The unexpected success in reaching these IPs without my script is likely due to Docker's network configuration. In our lab environment, the host system appears to be responding to these requests. The duplicate packets for 8.8.8.8 likely come from both legitimate responses and my spoofed packets.
+
+3. ARP and Routing Considerations:
+   - For local network destinations, ARP resolution must succeed before ICMP packets are sent
+   - External destinations first go through ARP resolution to find the gateway's MAC address
+   - The "ip route get" command would show which gateway is used for external destinations
