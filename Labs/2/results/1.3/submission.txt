@@ -1,0 +1,51 @@
+Implementation:
+I implemented a custom traceroute tool using Python and Scapy that works by sending packets with incrementing TTL values and analyzing the responses. The tool follows these steps:
+
+1. For each hop (TTL value from 1 to max_hops):
+   - Create an IP packet with the current TTL value
+   - Send the packet to the destination
+   - Analyze the response:
+     * If we receive an ICMP Echo Reply (type 0), we've reached the destination
+     * If we receive an ICMP Time Exceeded (type 11, code 0), we've found a router at that hop
+     * If we receive no response (timeout), the hop is unreachable
+
+2. For each response, the tool displays:
+   - TTL value (hop count)
+   - IP address of the responding device
+   - Round-trip time (RTT) in milliseconds
+   - Type of response received
+
+The key part of my implementation is:
+
+packet = IP(dst=destination, ttl=ttl) / ICMP()
+start_time = time.time()
+reply = sr1(packet, timeout=timeout, verbose=0)
+rtt = (time.time() - start_time) * 1000
+
+if(reply.haslayer(ICMP)):
+    icmp_type = reply.getlayer(ICMP).type
+    if(icmp_type == 0):  # Echo Reply - reached destination
+        print(f"{ttl:<5} {reply.src:<20} {rtt:.2f} ms    Echo Reply")
+    elif(icmp_type == 11):  # Time Exceeded
+        print(f"{ttl:<5} {reply.src:<20} {rtt:.2f} ms    Time Exceeded")
+
+Results and Analysis:
+Testing within the lab environment revealed interesting insights about the network topology:
+
+1. Local network traces (to 10.9.0.5 and 10.9.0.6):
+   - Both hosts were reached in exactly 1 hop
+   - Example output:
+     
+     TTL   IP Address           RTT (ms)   Response Type
+     ------------------------------------------------------------
+     1     10.9.0.6             57.64 ms    Echo Reply (Destination reached)
+     
+     Destination 10.9.0.6 reached after 1 hops!
+     
+
+2. This confirms that all containers in the lab environment are on the same network segment with no intermediate routers between them, which matches the expected Docker bridge network configuration.
+
+3. Attempts to trace to external IP addresses (like 8.8.8.8) failed with routing errors, confirming that the lab environment is properly isolated from the internet.
+
+Comparison to standard traceroute:
+My implementation works on the same principle as the standard traceroute tool, sending packets with incrementing TTL values. While the standard tool typically uses UDP or TCP packets, I used ICMP echo requests which are simple and generally allowed through firewalls. The tool successfully demonstrates how traceroute works by revealing the network path between hosts.
